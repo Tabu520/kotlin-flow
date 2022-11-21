@@ -6,7 +6,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val dispatchers: DispatcherProvider
+) : ViewModel() {
 
     val countDownFlow = flow {
         val startingValue = 10
@@ -17,7 +19,7 @@ class MainViewModel : ViewModel() {
             currentValue--
             emit(currentValue)
         }
-    }
+    }.flowOn(dispatchers.main)
 
     private val _stateFlow = MutableStateFlow(0)
     val stateFlow = _stateFlow.asStateFlow()
@@ -28,13 +30,13 @@ class MainViewModel : ViewModel() {
     init {
         collectFlow()
         squareNumber(3)
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main) {
             sharedFlow.collect {
                 delay(2000L)
                 println("FIRST FLOW: The received number is $it")
             }
         }
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main) {
             sharedFlow.collect {
                 delay(2000L)
                 println("SECOND FLOW: The received number is $it")
@@ -48,7 +50,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun squareNumber(number: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.main) {
             _sharedFlow.emit(number * number)
         }
     }
