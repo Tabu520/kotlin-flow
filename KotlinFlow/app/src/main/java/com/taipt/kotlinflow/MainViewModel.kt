@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-    val countDownFlow = flow<Int> {
+    val countDownFlow = flow {
         val startingValue = 10
         var currentValue = startingValue
         emit(startingValue)
@@ -19,8 +19,15 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private val _stateFlow = MutableStateFlow(0)
+    val stateFlow = _stateFlow.asStateFlow()
+
     init {
         collectFlow()
+    }
+
+    fun incrementCounter() {
+        _stateFlow.value += 1
     }
 
     private fun collectFlow() {
