@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
@@ -16,6 +17,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taipt.kotlinflow.ui.theme.KotlinFlowTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -34,7 +37,7 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
         collectLatestLifecycleFlow(viewModel.stateFlow) { number ->
-            binding.tvCounter.text = number.toString()
+//            binding.tvCounter.text = number.toString()
         }
 
         setContent {
@@ -42,6 +45,13 @@ class MainActivity : ComponentActivity() {
                 val viewModel = viewModel<MainViewModel>()
                 val time = viewModel.countDownFlow.collectAsState(initial = 10)
                 val count = viewModel.stateFlow.collectAsState(0)
+
+                LaunchedEffect(key1 = true) {
+                    viewModel.sharedFlow.collect { number ->
+
+                    }
+                }
+
                 Box(modifier = Modifier.fillMaxSize()) {
 //                    Text(
 //                        text = time.value.toString(),
@@ -64,6 +74,14 @@ fun <T> ComponentActivity.collectLatestLifecycleFlow(flow: Flow<T>, collect: sus
     lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             flow.collectLatest(collect)
+        }
+    }
+}
+
+fun <T> ComponentActivity.collectLifecycleFlow(flow: Flow<T>, collect: FlowCollector<T>) {
+    lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collect(collect)
         }
     }
 }
